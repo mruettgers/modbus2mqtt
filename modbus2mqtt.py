@@ -84,7 +84,7 @@ class Register:
         try:
             res=master.execute(self.slaveid,self.functioncode,self.register,self.size,data_format=self.format[0])
             r=res[0]
-            if self.format[1]:
+            if len(self.format) > 1 and self.format[1]:
                 r=self.format[1] % r
             if r!=self.lastval or (args.force and (time.time() - self.last) > int(args.force)):
                 self.lastval=r
@@ -95,8 +95,7 @@ class Register:
         except modbus_tk.modbus.ModbusError as exc:
             logging.error("Error reading "+self.topic+": Slave returned %s - %s", exc, exc.get_exception_code())
         except Exception as exc:
-            logging.error("Error reading "+self.topic+": %s", exc)
-            
+            logging.error("Error reading "+self.topic+": %s", exc, exc_info=True)
 
 registers=[]
 
@@ -114,7 +113,7 @@ with open(args.registers,"r") as csvfile:
         if row["Topic"][0]=="#":
             continue
         if row["Topic"]=="DEFAULT":
-            temp=dict((k,v) for k,v in row.iteritems() if v is not None and v!="")
+            temp=dict((k,v) for k,v in row.items() if v is not None and v!="")
             defaultrow.update(temp)
             continue
         freq=row["Frequency"]
